@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentinel | Forensic Deepfake Detection</title>
+    <title>Sentinel | Digital Forensics & Deepfake Detection</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs" type="module"></script>
     <style>
-        @keyframes subtle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .hero-float { animation: subtle-float 6s ease-in-out infinite; }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
         @keyframes pulse-border {
             0%, 100% { border-color: rgba(79, 70, 229, 0.2); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.1); }
             50% { border-color: rgba(79, 70, 229, 1); box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
         }
         .animate-pulse-border { animation: pulse-border 2s infinite; }
+        .tab-nums { font-variant-numeric: tabular-nums; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 selection:bg-indigo-100">
@@ -22,7 +21,7 @@
     <nav class="fixed top-0 w-full z-50 glass border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">S</div>
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">S</div>
                 <span class="text-xl font-bold tracking-tight">Sentinel</span>
             </div>
             <div class="hidden md:flex gap-8 text-sm font-medium text-slate-600">
@@ -30,78 +29,82 @@
                 <a href="#scanner" class="hover:text-indigo-600 transition-colors">Scanner</a>
                 <a href="#tech" class="hover:text-indigo-600 transition-colors">Technology</a>
             </div>
-            <a href="#scanner" class="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-indigo-700 transition-all shadow-md">Run Analysis</a>
+            <a href="#scanner" class="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-indigo-700 transition-all shadow-md">Start Analysis</a>
         </div>
     </nav>
 
-    <header id="hero" class="pt-32 pb-20 px-6">
+    <header id="hero" class="pt-32 pb-16 px-6">
         <div class="max-w-7xl mx-auto text-center">
-            <span class="inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-widest mb-4">AI Forensics Protocol 2026</span>
-            <h1 class="text-5xl md:text-7xl font-black text-slate-900 mb-6 leading-tight">
-                Verify Reality in a <br> <span class="text-indigo-600">Synthetic World.</span>
-            </h1>
-            <p class="text-xl text-slate-500 max-w-2xl mx-auto mb-10">
-                Professional-grade deepfake detection using SigLIP2 Transformers. Analyze facial geometry and pixel authenticity instantly.
-            </p>
+            <span class="inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-widest mb-4">Forensic Protocol v2.6</span>
+            <h1 class="text-5xl md:text-7xl font-black text-slate-900 mb-6 leading-tight">Verify Reality.</h1>
+            <p class="text-xl text-slate-500 max-w-2xl mx-auto">Advanced deepfake identification powered by SigLIP2 Transformers and MediaPipe ROI Extraction.</p>
         </div>
     </header>
 
-    <section id="scanner" class="py-20 bg-slate-100">
+    <section id="scanner" class="py-12 bg-slate-100">
         <div class="max-w-4xl mx-auto px-6">
-            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+            <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
                 <div class="p-8 md:p-12">
                     
                     <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
-                        <h2 class="text-2xl font-bold text-slate-800">Sentinel Scanner</h2>
+                        <h2 class="text-2xl font-bold">Deepfake Scanner</h2>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="crop-checkbox" class="sr-only peer" checked>
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                            <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                             <span class="ml-3 text-sm font-medium text-slate-600">Smart Face Crop</span>
                         </label>
                     </div>
 
                     <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center transition-all hover:border-indigo-400 hover:bg-indigo-50/30 group cursor-pointer relative">
                         <input type="file" id="file-input" class="hidden" accept="image/*">
-                        
                         <div id="idle-view">
-                            <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            </div>
-                            <p class="text-slate-600 font-medium">Drop forensic sample or click to browse</p>
+                            <svg class="w-12 h-12 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <p class="text-slate-500">Drag forensic sample or click to browse</p>
                         </div>
-
                         <div id="preview-view" class="hidden">
-                            <img id="image-preview" class="max-h-80 mx-auto rounded-lg shadow-lg mb-4">
-                            <button id="remove-img" class="text-xs text-red-500 font-bold hover:underline transition-all">Remove & Replace</button>
+                            <img id="image-preview" class="max-h-72 mx-auto rounded-lg shadow-md mb-4">
+                            <button id="remove-img" class="text-xs text-red-500 font-bold hover:underline">Change Image</button>
                             <canvas id="crop-canvas" class="hidden"></canvas>
                         </div>
                     </div>
 
-                    <button id="analyze-btn" class="w-full mt-8 bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-indigo-600 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <button id="analyze-btn" class="w-full mt-8 bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-indigo-600 transition-all disabled:opacity-50" disabled>
                         Initialize Analysis
                     </button>
 
-                    <div id="results" class="hidden mt-10 p-8 bg-slate-50 rounded-2xl border border-slate-200 min-h-[140px] flex flex-col justify-center">
-                        
+                    <div id="results" class="hidden mt-10 p-8 bg-slate-50 rounded-2xl border border-slate-200">
                         <div id="loading" class="hidden flex flex-col items-center gap-4 animate-pulse">
-                            <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                            <p class="text-indigo-600 font-bold text-sm tracking-widest uppercase">Analyzing Biological Signals</p>
+                            <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                            <p class="text-indigo-600 font-bold text-xs uppercase tracking-widest">Scanning Bio-Artifacts...</p>
                         </div>
 
-                        <div id="success-ui" class="hidden text-center space-y-4">
-                            <p id="result-status" class="text-2xl font-black uppercase tracking-tighter"></p>
-                            <div class="w-full bg-slate-200 h-4 rounded-full overflow-hidden shadow-inner">
-                                <div id="result-bar" class="h-full bg-indigo-600 transition-all duration-1000 ease-out" style="width: 0%"></div>
+                        <div id="success-ui" class="hidden space-y-8">
+                            <div class="text-center">
+                                <p id="result-status" class="text-3xl font-black mb-2 uppercase"></p>
+                                <p class="text-slate-500 text-sm">Forensic Authenticity Report</p>
                             </div>
-                            <p class="text-slate-500 text-sm font-medium">Forensic Confidence: <span id="confidence-val" class="text-slate-900 font-bold">0%</span></p>
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Deepfake Score</p>
+                                    <p id="fake-percent" class="text-3xl font-black text-slate-900 tab-nums">0%</p>
+                                    <div class="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden">
+                                        <div id="fake-bar" class="h-full bg-red-500 transition-all duration-1000" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Real Confidence</p>
+                                    <p id="real-percent" class="text-3xl font-black text-slate-900 tab-nums">0%</p>
+                                    <div class="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden">
+                                        <div id="real-bar" class="h-full bg-green-500 transition-all duration-1000" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div id="result-error" class="hidden text-center py-4">
-                            <div class="text-red-500 mb-2">
-                                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <p class="text-slate-800 font-bold">Forensic Module Offline</p>
-                            <p class="text-slate-500 text-sm mt-1">Unable to reach the SigLIP2 endpoint. Please verify your connection or API token.</p>
+                        <div id="result-error" class="hidden text-center text-red-500 py-4">
+                            <p class="font-bold">Forensic Module Offline</p>
+                            <p class="text-sm mt-1 text-slate-500">The AI model is busy or sleeping. Please try again in 15 seconds.</p>
                         </div>
                     </div>
 
@@ -110,40 +113,13 @@
         </div>
     </section>
 
-    <section id="tech" class="py-24 px-6 max-w-7xl mx-auto">
-        <div class="grid md:grid-cols-3 gap-12">
-            <div class="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <h3 class="text-lg font-bold mb-2">SigLIP2 Backbone</h3>
-                <p class="text-slate-500 text-sm leading-relaxed">Leverages advanced Transformers trained on massive datasets to identify noise patterns unique to generative AI models.</p>
-            </div>
-            <div class="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                </div>
-                <h3 class="text-lg font-bold mb-2">Smart ROI Crop</h3>
-                <p class="text-slate-500 text-sm leading-relaxed">Integrated BlazeFace models perform on-device facial isolation to ensure the detector focuses only on critical biometric data.</p>
-            </div>
-            <div class="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                </div>
-                <h3 class="text-lg font-bold mb-2">Zero-Data Retention</h3>
-                <p class="text-slate-500 text-sm leading-relaxed">Analysis is performed through transient serverless functions. Images are processed in-memory and never written to disk.</p>
-            </div>
-        </div>
-    </section>
-
-    <footer class="py-12 border-t border-slate-200 text-center text-slate-400 text-sm">
-        &copy; 2026 Sentinel Deepfake Forensics. Optimized for Digital Integrity Research.
+    <footer class="py-12 text-center text-slate-400 text-xs border-t border-slate-200 bg-white">
+        &copy; 2026 Sentinel Digital Forensics. Optimized for Identity Protection.
     </footer>
 
     <script type="module">
         import { FaceDetector, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest";
 
-        // DOM Elements
         let faceDetector;
         const fileInput = document.getElementById('file-input');
         const dropZone = document.getElementById('drop-zone');
@@ -153,37 +129,21 @@
         const cropCheckbox = document.getElementById('crop-checkbox');
         const removeImgBtn = document.getElementById('remove-img');
 
-        // 1. Initialize MediaPipe Face Detector
         async function initDetector() {
-            console.log("🚀 Initializing MediaPipe Face Detector...");
             try {
                 const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
                 faceDetector = await FaceDetector.createFromOptions(vision, {
-                    baseOptions: { 
-                        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, 
-                        delegate: "GPU" 
-                    },
+                    baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, delegate: "GPU" },
                     runningMode: "IMAGE"
                 });
-                console.log("✅ Detector Ready!");
-            } catch (e) {
-                console.error("❌ MediaPipe Initialization Failed:", e);
-            }
+                console.log("✅ MediaPipe Ready");
+            } catch (e) { console.error("MediaPipe Load Error", e); }
         }
         initDetector();
 
-        // 2. File Upload & Interface Management
-        dropZone.onclick = (e) => {
-            if(e.target === removeImgBtn) return;
-            fileInput.click();
-        };
-
+        dropZone.onclick = (e) => { if(e.target !== removeImgBtn) fileInput.click(); };
         fileInput.onchange = (e) => handleFile(e.target.files[0]);
-
-        removeImgBtn.onclick = (e) => {
-            e.stopPropagation();
-            resetUI();
-        };
+        removeImgBtn.onclick = (e) => { e.stopPropagation(); resetUI(); };
 
         function handleFile(file) {
             if (!file) return;
@@ -205,130 +165,93 @@
             document.getElementById('preview-view').classList.add('hidden');
             document.getElementById('results').classList.add('hidden');
             analyzeBtn.disabled = true;
-            console.log("♻️ Interface reset.");
         }
 
-        // 3. Analysis Orchestration
         analyzeBtn.onclick = async () => {
-            console.log("🔍 Starting Analysis...");
             setLoading(true);
             let blobToSend;
 
             try {
-                // A. Region of Interest (ROI) Processing
                 if (cropCheckbox.checked && faceDetector) {
-                    console.log("✂️ Extracting facial region...");
                     const detections = faceDetector.detect(previewImg).detections;
-                    
                     if (detections.length > 0) {
                         const box = detections[0].boundingBox;
                         const ctx = cropCanvas.getContext('2d');
-                        const pad = box.width * 0.25; // 25% margin for better context
-                        
-                        cropCanvas.width = box.width + (pad * 2);
-                        cropCanvas.height = box.height + (pad * 2);
-                        
-                        ctx.drawImage(
-                            previewImg, 
-                            box.originX - pad, box.originY - pad, box.width + (pad * 2), box.height + (pad * 2), 
-                            0, 0, cropCanvas.width, cropCanvas.height
-                        );
+                        const pad = box.width * 0.25;
+                        cropCanvas.width = box.width + pad * 2;
+                        cropCanvas.height = box.height + pad * 2;
+                        ctx.drawImage(previewImg, box.originX - pad, box.originY - pad, box.width + pad * 2, box.height + pad * 2, 0, 0, cropCanvas.width, cropCanvas.height);
                         blobToSend = await new Promise(res => cropCanvas.toBlob(res, 'image/jpeg', 0.95));
-                        console.log("✅ Smart crop generated.");
-                    } else {
-                        console.warn("⚠️ No face found. Proceeding with full frame.");
                     }
                 }
                 
-                if (!blobToSend) {
-                    blobToSend = await fetch(previewImg.src).then(r => r.blob());
-                }
+                if (!blobToSend) blobToSend = await fetch(previewImg.src).then(r => r.blob());
 
-                // B. API Transmission
-                console.log("📡 Transmitting data to secure endpoint...");
                 const formData = new FormData();
                 formData.append('file', blobToSend);
 
                 const res = await fetch('/api/detect', { method: 'POST', body: formData });
-                console.log(`📡 Response Status: ${res.status}`);
-                
                 const data = await res.json();
-                console.log("📦 AI Report Received:", data);
-
-                if (data.error) throw new Error(data.error);
                 
+                if (data.error) throw new Error(data.error);
                 showResults(data);
 
             } catch (err) {
-                console.error("❌ Critical Forensic Failure:", err);
-                showResultError();
+                console.error(err);
+                document.getElementById('result-error').classList.remove('hidden');
+                document.getElementById('loading').classList.add('hidden');
             } finally {
-                setLoading(false);
+                setLoading(false, true); // Keep the container visible
             }
         };
 
-        // 4. UI State Functions (Null-Safe Updates)
-        function setLoading(state) {
-            if (analyzeBtn) {
-                analyzeBtn.disabled = state;
-                analyzeBtn.innerText = state ? "Analyzing Biological Patterns..." : "Initialize Analysis";
-            }
+        function setLoading(state, isFinished = false) {
+            analyzeBtn.disabled = state;
+            analyzeBtn.innerText = state ? "Analyzing..." : "Initialize Analysis";
             
-            const resContainer = document.getElementById('results');
-            if (resContainer) resContainer.classList.remove('hidden');
+            const results = document.getElementById('results');
+            if (results) results.classList.remove('hidden');
 
-            const toggle = (id, hide) => {
-                const el = document.getElementById(id);
-                if (el) hide ? el.classList.add('hidden') : el.classList.remove('hidden');
-            };
+            const loader = document.getElementById('loading');
+            const successUI = document.getElementById('success-ui');
+            const errorUI = document.getElementById('result-error');
 
-            toggle('loading', !state);
-            toggle('success-ui', true);
-            toggle('result-error', true);
-
-            if (state && dropZone) dropZone.classList.add('animate-pulse-border');
-            else if (dropZone) dropZone.classList.remove('animate-pulse-border');
+            if (state) {
+                loader.classList.remove('hidden');
+                successUI.classList.add('hidden');
+                errorUI.classList.add('hidden');
+                dropZone.classList.add('animate-pulse-border');
+            } else if (isFinished) {
+                loader.classList.add('hidden');
+                dropZone.classList.remove('animate-pulse-border');
+            }
         }
 
         function showResults(data) {
-            const successUI = document.getElementById('success-ui');
-            if (successUI) successUI.classList.remove('hidden');
+            document.getElementById('success-ui').classList.remove('hidden');
             
-            // Search dynamically for 'Fake' or 'Synthetic' labels in the array
-            const fakeEntry = data.find(i => 
-                i.label && (i.label.toLowerCase().includes('fake') || i.label.toLowerCase().includes('synthetic'))
-            ) || {score: 0};
+            const fake = data.find(i => i.label === 'Fake') || {score: 0};
+            const real = data.find(i => i.label === 'Real') || {score: 0};
             
-            const confidence = (fakeEntry.score * 100).toFixed(1);
+            const fakePercent = (fake.score * 100).toFixed(1);
+            const realPercent = (real.score * 100).toFixed(1);
+            
             const status = document.getElementById('result-status');
-            const bar = document.getElementById('result-bar');
             
-            console.log(`📊 Analysis Results: Fake Confidence = ${confidence}%`);
-
-            if (status && bar) {
-                if (fakeEntry.score > 0.7) {
-                    status.innerText = "🚨 Deepfake Detected";
-                    status.className = "text-2xl font-black mb-2 text-red-600 uppercase";
-                    bar.className = "h-full bg-red-600 transition-all duration-1000";
-                } else {
-                    status.innerText = "✅ Authentic Content";
-                    status.className = "text-2xl font-black mb-2 text-green-600 uppercase";
-                    bar.className = "h-full bg-green-600 transition-all duration-1000";
-                }
-                
-                setTimeout(() => {
-                    bar.style.width = `${confidence}%`;
-                    const confLabel = document.getElementById('confidence-val');
-                    if (confLabel) confLabel.innerText = `${confidence}%`;
-                }, 50);
+            if (fake.score > 0.7) {
+                status.innerText = "🚨 Deepfake Detected";
+                status.className = "text-3xl font-black mb-2 text-red-600 uppercase tracking-tighter";
+            } else {
+                status.innerText = "✅ Authentic Content";
+                status.className = "text-3xl font-black mb-2 text-green-600 uppercase tracking-tighter";
             }
-        }
-
-        function showResultError() {
-            const loader = document.getElementById('loading');
-            const errorUI = document.getElementById('result-error');
-            if (loader) loader.classList.add('hidden');
-            if (errorUI) errorUI.classList.remove('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('fake-bar').style.width = `${fakePercent}%`;
+                document.getElementById('real-bar').style.width = `${realPercent}%`;
+                document.getElementById('fake-percent').innerText = `${fakePercent}%`;
+                document.getElementById('real-percent').innerText = `${realPercent}%`;
+            }, 50);
         }
     </script>
 </body>
