@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentinel | Advanced Deepfake Detection</title>
+    <title>Sentinel | Forensic Deepfake Detection</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs" type="module"></script>
     <style>
         @keyframes subtle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .hero-float { animation: subtle-float 6s ease-in-out infinite; }
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .animate-pulse-border { animation: pulse-border 2s infinite; }
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(79, 70, 229, 0.2); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.1); }
+            50% { border-color: rgba(79, 70, 229, 1); box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 selection:bg-indigo-100">
 
     <nav class="fixed top-0 w-full z-50 glass border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
                 <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">S</div>
                 <span class="text-xl font-bold tracking-tight">Sentinel</span>
             </div>
@@ -31,12 +36,12 @@
 
     <header id="hero" class="pt-32 pb-20 px-6">
         <div class="max-w-7xl mx-auto text-center">
-            <span class="inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-widest mb-4">Zero-Trust Media Era</span>
+            <span class="inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-widest mb-4">Zero-Trust Media Initiative</span>
             <h1 class="text-5xl md:text-7xl font-black text-slate-900 mb-6 leading-tight">
                 Verify Reality in a <br> <span class="text-indigo-600">Synthetic World.</span>
             </h1>
             <p class="text-xl text-slate-500 max-w-2xl mx-auto mb-10">
-                Professional-grade deepfake detection using SigLIP2 Vision Transformers. Protect your identity and verify digital assets instantly.
+                Professional-grade deepfake detection using SigLIP2 Vision Transformers. Analyze facial geometry and pixel-level authenticity in seconds.
             </p>
         </div>
     </header>
@@ -55,29 +60,33 @@
                         </label>
                     </div>
 
-                    <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center transition-all hover:border-indigo-400 hover:bg-indigo-50/30 group cursor-pointer">
+                    <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center transition-all hover:border-indigo-400 hover:bg-indigo-50/30 group cursor-pointer relative">
                         <input type="file" id="file-input" class="hidden" accept="image/*">
+                        
                         <div id="idle-view">
                             <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </div>
                             <p class="text-slate-600 font-medium">Drop forensic sample or click to browse</p>
                         </div>
+
                         <div id="preview-view" class="hidden">
-                            <img id="image-preview" class="max-h-80 mx-auto rounded-lg shadow-lg">
+                            <img id="image-preview" class="max-h-80 mx-auto rounded-lg shadow-lg mb-4">
+                            <button id="remove-img" class="text-xs text-red-500 font-bold hover:underline">Remove Image</button>
                             <canvas id="crop-canvas" class="hidden"></canvas>
                         </div>
                     </div>
 
-                    <button id="analyze-btn" class="w-full mt-8 bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-indigo-600 transition-all disabled:opacity-50" disabled>
+                    <button id="analyze-btn" class="w-full mt-8 bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-indigo-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         Initialize Analysis
                     </button>
 
                     <div id="results" class="hidden mt-10 p-6 bg-slate-50 rounded-2xl border border-slate-200">
-                        <div id="loading" class="flex items-center gap-4 animate-pulse">
-                            <div class="w-10 h-10 bg-slate-200 rounded-full"></div>
-                            <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+                        <div id="loading" class="hidden flex items-center gap-4 animate-pulse">
+                            <div class="w-10 h-10 bg-indigo-200 rounded-full"></div>
+                            <div class="h-4 bg-indigo-100 rounded w-1/2"></div>
                         </div>
+
                         <div id="success-ui" class="hidden text-center">
                             <p id="result-status" class="text-2xl font-black mb-2 uppercase"></p>
                             <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden mb-4">
@@ -85,7 +94,16 @@
                             </div>
                             <p class="text-slate-500 text-sm">Forensic Confidence: <span id="confidence-val" class="font-bold">0%</span></p>
                         </div>
+
+                        <div id="result-error" class="hidden text-center py-4">
+                            <div class="text-red-500 mb-2">
+                                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <p class="text-slate-800 font-bold">Analysis Failed</p>
+                            <p class="text-slate-500 text-sm mt-1">Hugging Face API is busy or the token is invalid. Please try again in 20s.</p>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -94,165 +112,207 @@
     <section id="tech" class="py-24 px-6 max-w-7xl mx-auto grid md:grid-cols-3 gap-12">
         <div class="space-y-4">
             <h3 class="text-xl font-bold">SigLIP2 Backbone</h3>
-            <p class="text-slate-500 leading-relaxed">Utilizes Vision Transformers (ViT) optimized via sigmoid loss to detect micro-inconsistencies in skin texture and lighting.</p>
+            <p class="text-slate-500 leading-relaxed text-sm">Utilizes Vision Transformers (ViT) optimized via sigmoid loss to detect micro-inconsistencies in skin texture, lighting, and noise patterns.</p>
         </div>
         <div class="space-y-4">
-            <h3 class="text-xl font-bold">Privacy First</h3>
-            <p class="text-slate-500 leading-relaxed">Processing occurs via secure Vercel edge functions. Images are never stored on our servers.</p>
+            <h3 class="text-xl font-bold">Smart Cropping</h3>
+            <p class="text-slate-500 leading-relaxed text-sm">Integrated MediaPipe BlazeFace models extract high-density facial regions on-device, increasing detection accuracy by up to 22%.</p>
         </div>
         <div class="space-y-4">
-            <h3 class="text-xl font-bold">On-Device Preprocessing</h3>
-            <p class="text-slate-500 leading-relaxed">Smart cropping identifies the high-density facial data before analysis to increase accuracy by up to 22%.</p>
+            <h3 class="text-xl font-bold">Privacy-First Forensics</h3>
+            <p class="text-slate-500 leading-relaxed text-sm">Analysis is handled via secure serverless functions. Images are transiently processed and never stored on our servers.</p>
         </div>
     </section>
 
     <footer class="py-12 border-t border-slate-200 text-center text-slate-400 text-sm">
-        &copy; 2026 Sentinel Deepfake Forensics. Built for the Digital Truth Initiative.
+        &copy; 2026 Sentinel Deepfake Forensics. Developed for the CSE Final Year Research Project.
     </footer>
 
     <script type="module">
         import { FaceDetector, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest";
 
-let faceDetector;
-const fileInput = document.getElementById('file-input');
-const dropZone = document.getElementById('drop-zone');
-const previewImg = document.getElementById('image-preview');
-const analyzeBtn = document.getElementById('analyze-btn');
-const cropCanvas = document.getElementById('crop-canvas');
-const cropCheckbox = document.getElementById('crop-checkbox');
+        // Global Elements
+        let faceDetector;
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const previewImg = document.getElementById('image-preview');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const cropCanvas = document.getElementById('crop-canvas');
+        const cropCheckbox = document.getElementById('crop-checkbox');
+        const removeImgBtn = document.getElementById('remove-img');
 
-async function initDetector() {
-    console.log("🚀 Initializing MediaPipe Face Detector...");
-    try {
-        const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
-        faceDetector = await FaceDetector.createFromOptions(vision, {
-            baseOptions: { 
-                modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, 
-                delegate: "GPU" 
-            },
-            runningMode: "IMAGE"
-        });
-        console.log("✅ Detector Ready!");
-    } catch (e) {
-        console.error("❌ MediaPipe Init Failed:", e);
-    }
-}
-initDetector();
-
-dropZone.onclick = () => fileInput.click();
-fileInput.onchange = (e) => handleFile(e.target.files[0]);
-
-function handleFile(file) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        previewImg.src = e.target.result;
-        document.getElementById('idle-view').classList.add('hidden');
-        document.getElementById('preview-view').classList.remove('hidden');
-        analyzeBtn.disabled = false;
-        console.log("📸 Image loaded into preview.");
-    };
-    reader.readAsDataURL(file);
-}
-
-analyzeBtn.onclick = async () => {
-    console.log("🔍 Analysis Started...");
-    setLoading(true);
-    let blobToSend;
-
-    try {
-        // STEP 1: SMART CROPPING
-        if (cropCheckbox.checked && faceDetector) {
-            console.log("✂️ Attempting Face Crop...");
-            const detections = faceDetector.detect(previewImg).detections;
-            
-            if (detections.length > 0) {
-                console.log(`✅ Face detected! (Count: ${detections.length})`);
-                const box = detections[0].boundingBox;
-                const ctx = cropCanvas.getContext('2d');
-                const pad = box.width * 0.2;
-                cropCanvas.width = box.width + pad * 2;
-                cropCanvas.height = box.height + pad * 2;
-                ctx.drawImage(previewImg, box.originX - pad, box.originY - pad, box.width + pad * 2, box.height + pad * 2, 0, 0, cropCanvas.width, cropCanvas.height);
-                blobToSend = await new Promise(res => cropCanvas.toBlob(res, 'image/jpeg'));
-                console.log("📦 Blob created from cropped face.");
-            } else {
-                console.warn("⚠️ No face detected. Sending full image instead.");
+        // 1. Initialize MediaPipe Face Detector
+        async function initDetector() {
+            console.log("🚀 Initializing MediaPipe Face Detector...");
+            try {
+                const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
+                faceDetector = await FaceDetector.createFromOptions(vision, {
+                    baseOptions: { 
+                        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, 
+                        delegate: "GPU" 
+                    },
+                    runningMode: "IMAGE"
+                });
+                console.log("✅ Detector Ready!");
+            } catch (e) {
+                console.error("❌ MediaPipe Initialization Failed:", e);
             }
         }
-        
-        if (!blobToSend) {
-            console.log("📤 Preparing full image for upload...");
-            blobToSend = await fetch(previewImg.src).then(r => r.blob());
+        initDetector();
+
+        // 2. File Upload Handling
+        dropZone.onclick = (e) => {
+            if(e.target === removeImgBtn) return;
+            fileInput.click();
+        };
+
+        fileInput.onchange = (e) => handleFile(e.target.files[0]);
+
+        removeImgBtn.onclick = (e) => {
+            e.stopPropagation();
+            resetUI();
+        };
+
+        function handleFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                document.getElementById('idle-view').classList.add('hidden');
+                document.getElementById('preview-view').classList.remove('hidden');
+                analyzeBtn.disabled = false;
+                document.getElementById('results').classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
         }
 
-        // STEP 2: API CALL
-        console.log("📡 Sending request to /api/detect...");
-        const formData = new FormData();
-        formData.append('file', blobToSend);
-
-        const res = await fetch('/api/detect', { method: 'POST', body: formData });
-        
-        console.log(`📡 Response Status: ${res.status}`);
-        const data = await res.json();
-        
-        // STEP 3: LOG DATA & UPDATE UI
-        console.log("📦 DATA RECEIVED FROM API:", data);
-        
-        if (data.error) {
-            throw new Error(data.error);
+        function resetUI() {
+            fileInput.value = "";
+            previewImg.src = "";
+            document.getElementById('idle-view').classList.remove('hidden');
+            document.getElementById('preview-view').classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+            analyzeBtn.disabled = true;
         }
-        
-        showResults(data);
 
-    } catch (err) {
-        console.error("❌ CRITICAL ERROR:", err);
-        showResultError();
-    } finally {
-        setLoading(false);
-    }
-};
+        // 3. Analysis Logic
+        analyzeBtn.onclick = async () => {
+            console.log("🔍 Starting Forensic Analysis...");
+            setLoading(true);
+            let blobToSend;
 
-function setLoading(state) {
-    analyzeBtn.disabled = state;
-    analyzeBtn.innerText = state ? "Analyzing Signals..." : "Initialize Analysis";
-    document.getElementById('results').classList.remove('hidden');
-    document.getElementById('loading').classList.toggle('hidden', !state);
-    document.getElementById('success-ui').classList.add('hidden');
-    document.getElementById('result-error').classList.add('hidden');
-}
+            try {
+                // A. Smart Cropping (On-Device)
+                if (cropCheckbox.checked && faceDetector) {
+                    console.log("✂️ Detecting face regions...");
+                    const detections = faceDetector.detect(previewImg).detections;
+                    
+                    if (detections.length > 0) {
+                        console.log(`✅ Face identified.`);
+                        const box = detections[0].boundingBox;
+                        const ctx = cropCanvas.getContext('2d');
+                        const pad = box.width * 0.25; // 25% padding for context
+                        
+                        cropCanvas.width = box.width + pad * 2;
+                        cropCanvas.height = box.height + pad * 2;
+                        
+                        ctx.drawImage(
+                            previewImg, 
+                            box.originX - pad, box.originY - pad, box.width + pad * 2, box.height + pad * 2, 
+                            0, 0, cropCanvas.width, cropCanvas.height
+                        );
+                        blobToSend = await new Promise(res => cropCanvas.toBlob(res, 'image/jpeg', 0.9));
+                    } else {
+                        console.warn("⚠️ No face detected in frame. Using full image.");
+                    }
+                }
+                
+                if (!blobToSend) {
+                    blobToSend = await fetch(previewImg.src).then(r => r.blob());
+                }
 
-function showResults(data) {
-    document.getElementById('success-ui').classList.remove('hidden');
-    // Flexible search for the 'Fake' label in the SigLIP2 output array
-    const fakeEntry = data.find(i => i.label.toLowerCase().includes('fake')) || {score: 0};
-    const confidence = (fakeEntry.score * 100).toFixed(1);
-    
-    console.log(`📊 Analysis Results: Fake Prob = ${confidence}%`);
+                // B. Backend Request
+                console.log("📡 Transmitting data to secure endpoint...");
+                const formData = new FormData();
+                formData.append('file', blobToSend);
 
-    const status = document.getElementById('result-status');
-    const bar = document.getElementById('result-bar');
-    
-    if (fakeEntry.score > 0.7) {
-        status.innerText = "🚨 Deepfake Detected";
-        status.className = "text-2xl font-black mb-2 text-red-600";
-        bar.className = "h-full bg-red-600 transition-all duration-1000";
-    } else {
-        status.innerText = "✅ Authentic Content";
-        status.className = "text-2xl font-black mb-2 text-green-600";
-        bar.className = "h-full bg-green-600 transition-all duration-1000";
-    }
-    
-    setTimeout(() => {
-        bar.style.width = `${confidence}%`;
-        document.getElementById('confidence-val').innerText = `${confidence}%`;
-    }, 50);
-}
+                const res = await fetch('/api/detect', { method: 'POST', body: formData });
+                console.log(`📡 Status: ${res.status}`);
+                
+                const data = await res.json();
+                console.log("📦 AI Report Received:", data);
 
-function showResultError() {
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('result-error').classList.remove('hidden');
-}
+                if (data.error) throw new Error(data.error);
+                
+                showResults(data);
+
+            } catch (err) {
+                console.error("❌ Forensic Module Failed:", err);
+                showResultError();
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        // 4. UI State Management (Fixed for null-safety)
+        function setLoading(state) {
+            analyzeBtn.disabled = state;
+            analyzeBtn.innerText = state ? "Analyzing Biological Patterns..." : "Initialize Analysis";
+            
+            const results = document.getElementById('results');
+            if (results) results.classList.remove('hidden');
+
+            const toggle = (id, hide) => {
+                const el = document.getElementById(id);
+                if (el) hide ? el.classList.add('hidden') : el.classList.remove('hidden');
+            };
+
+            toggle('loading', !state);
+            toggle('success-ui', true);
+            toggle('result-error', true);
+
+            if (state) dropZone.classList.add('animate-pulse-border');
+            else dropZone.classList.remove('animate-pulse-border');
+        }
+
+        function showResults(data) {
+            toggleUI('success-ui', false);
+            
+            // Search for fake/synthetic labels dynamically
+            const fakeEntry = data.find(i => 
+                i.label.toLowerCase().includes('fake') || 
+                i.label.toLowerCase().includes('synthetic')
+            ) || {score: 0};
+            
+            const confidence = (fakeEntry.score * 100).toFixed(1);
+            const status = document.getElementById('result-status');
+            const bar = document.getElementById('result-bar');
+            
+            if (fakeEntry.score > 0.7) {
+                status.innerText = "🚨 Deepfake Detected";
+                status.className = "text-2xl font-black mb-2 text-red-600";
+                bar.className = "h-full bg-red-600 transition-all duration-1000";
+            } else {
+                status.innerText = "✅ Authentic Content";
+                status.className = "text-2xl font-black mb-2 text-green-600";
+                bar.className = "h-full bg-green-600 transition-all duration-1000";
+            }
+            
+            setTimeout(() => {
+                bar.style.width = `${confidence}%`;
+                document.getElementById('confidence-val').innerText = `${confidence}%`;
+            }, 50);
+        }
+
+        function showResultError() {
+            toggleUI('loading', true);
+            toggleUI('result-error', false);
+        }
+
+        function toggleUI(id, hide) {
+            const el = document.getElementById(id);
+            if (el) hide ? el.classList.add('hidden') : el.classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
