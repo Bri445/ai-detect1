@@ -113,107 +113,146 @@
     <script type="module">
         import { FaceDetector, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest";
 
-        let faceDetector;
-        const fileInput = document.getElementById('file-input');
-        const dropZone = document.getElementById('drop-zone');
-        const previewImg = document.getElementById('image-preview');
-        const analyzeBtn = document.getElementById('analyze-btn');
-        const cropCanvas = document.getElementById('crop-canvas');
-        const cropCheckbox = document.getElementById('crop-checkbox');
+let faceDetector;
+const fileInput = document.getElementById('file-input');
+const dropZone = document.getElementById('drop-zone');
+const previewImg = document.getElementById('image-preview');
+const analyzeBtn = document.getElementById('analyze-btn');
+const cropCanvas = document.getElementById('crop-canvas');
+const cropCheckbox = document.getElementById('crop-checkbox');
 
-        // Initialize MediaPipe Face Detector
-        async function initDetector() {
-            const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
-            faceDetector = await FaceDetector.createFromOptions(vision, {
-                baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, delegate: "GPU" },
-                runningMode: "IMAGE"
-            });
-        }
-        initDetector();
+async function initDetector() {
+    console.log("🚀 Initializing MediaPipe Face Detector...");
+    try {
+        const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
+        faceDetector = await FaceDetector.createFromOptions(vision, {
+            baseOptions: { 
+                modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`, 
+                delegate: "GPU" 
+            },
+            runningMode: "IMAGE"
+        });
+        console.log("✅ Detector Ready!");
+    } catch (e) {
+        console.error("❌ MediaPipe Init Failed:", e);
+    }
+}
+initDetector();
 
-        dropZone.onclick = () => fileInput.click();
-        fileInput.onchange = (e) => handleFile(e.target.files[0]);
+dropZone.onclick = () => fileInput.click();
+fileInput.onchange = (e) => handleFile(e.target.files[0]);
 
-        function handleFile(file) {
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImg.src = e.target.result;
-                document.getElementById('idle-view').classList.add('hidden');
-                document.getElementById('preview-view').classList.remove('hidden');
-                analyzeBtn.disabled = false;
-            };
-            reader.readAsDataURL(file);
-        }
+function handleFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        document.getElementById('idle-view').classList.add('hidden');
+        document.getElementById('preview-view').classList.remove('hidden');
+        analyzeBtn.disabled = false;
+        console.log("📸 Image loaded into preview.");
+    };
+    reader.readAsDataURL(file);
+}
 
-        analyzeBtn.onclick = async () => {
-            setLoading(true);
-            let blobToSend;
+analyzeBtn.onclick = async () => {
+    console.log("🔍 Analysis Started...");
+    setLoading(true);
+    let blobToSend;
 
-            try {
-                if (cropCheckbox.checked && faceDetector) {
-                    const detections = faceDetector.detect(previewImg).detections;
-                    if (detections.length > 0) {
-                        const box = detections[0].boundingBox;
-                        const ctx = cropCanvas.getContext('2d');
-                        // Add 20% padding
-                        const pad = box.width * 0.2;
-                        cropCanvas.width = box.width + pad * 2;
-                        cropCanvas.height = box.height + pad * 2;
-                        ctx.drawImage(previewImg, box.originX - pad, box.originY - pad, box.width + pad * 2, box.height + pad * 2, 0, 0, cropCanvas.width, cropCanvas.height);
-                        blobToSend = await new Promise(res => cropCanvas.toBlob(res, 'image/jpeg'));
-                    }
-                }
-                
-                if (!blobToSend) {
-                    blobToSend = await fetch(previewImg.src).then(r => r.blob());
-                }
-
-                const formData = new FormData();
-                formData.append('file', blobToSend);
-
-                const res = await fetch('/api/detect', { method: 'POST', body: formData });
-                const data = await res.json();
-                showResults(data);
-
-            } catch (err) {
-                alert("Something went wrong. Please check your connection.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        function setLoading(state) {
-            analyzeBtn.disabled = state;
-            analyzeBtn.innerText = state ? "Analyzing Signals..." : "Initialize Analysis";
-            document.getElementById('results').classList.remove('hidden');
-            document.getElementById('loading').classList.toggle('hidden', !state);
-            document.getElementById('success-ui').classList.add('hidden');
-        }
-
-        function showResults(data) {
-            document.getElementById('success-ui').classList.remove('hidden');
-            const fake = data.find(i => i.label.toLowerCase().includes('fake')) || {score: 0};
-            const confidence = (fake.score * 100).toFixed(1);
+    try {
+        // STEP 1: SMART CROPPING
+        if (cropCheckbox.checked && faceDetector) {
+            console.log("✂️ Attempting Face Crop...");
+            const detections = faceDetector.detect(previewImg).detections;
             
-            const status = document.getElementById('result-status');
-            const bar = document.getElementById('result-bar');
-            
-            if (fake.score > 0.7) {
-                status.innerText = "🚨 Deepfake Detected";
-                status.className = "text-2xl font-black mb-2 text-red-600";
-                bar.className = "h-full bg-red-600 transition-all duration-1000";
+            if (detections.length > 0) {
+                console.log(`✅ Face detected! (Count: ${detections.length})`);
+                const box = detections[0].boundingBox;
+                const ctx = cropCanvas.getContext('2d');
+                const pad = box.width * 0.2;
+                cropCanvas.width = box.width + pad * 2;
+                cropCanvas.height = box.height + pad * 2;
+                ctx.drawImage(previewImg, box.originX - pad, box.originY - pad, box.width + pad * 2, box.height + pad * 2, 0, 0, cropCanvas.width, cropCanvas.height);
+                blobToSend = await new Promise(res => cropCanvas.toBlob(res, 'image/jpeg'));
+                console.log("📦 Blob created from cropped face.");
             } else {
-                status.innerText = "✅ Authentic Content";
-                status.className = "text-2xl font-black mb-2 text-green-600";
-                bar.className = "h-full bg-green-600 transition-all duration-1000";
+                console.warn("⚠️ No face detected. Sending full image instead.");
             }
-            
-            setTimeout(() => {
-                bar.style.width = `${confidence}%`;
-                document.getElementById('confidence-val').innerText = `${confidence}%`;
-            }, 50);
         }
+        
+        if (!blobToSend) {
+            console.log("📤 Preparing full image for upload...");
+            blobToSend = await fetch(previewImg.src).then(r => r.blob());
+        }
+
+        // STEP 2: API CALL
+        console.log("📡 Sending request to /api/detect...");
+        const formData = new FormData();
+        formData.append('file', blobToSend);
+
+        const res = await fetch('/api/detect', { method: 'POST', body: formData });
+        
+        console.log(`📡 Response Status: ${res.status}`);
+        const data = await res.json();
+        
+        // STEP 3: LOG DATA & UPDATE UI
+        console.log("📦 DATA RECEIVED FROM API:", data);
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        showResults(data);
+
+    } catch (err) {
+        console.error("❌ CRITICAL ERROR:", err);
+        showResultError();
+    } finally {
+        setLoading(false);
+    }
+};
+
+function setLoading(state) {
+    analyzeBtn.disabled = state;
+    analyzeBtn.innerText = state ? "Analyzing Signals..." : "Initialize Analysis";
+    document.getElementById('results').classList.remove('hidden');
+    document.getElementById('loading').classList.toggle('hidden', !state);
+    document.getElementById('success-ui').classList.add('hidden');
+    document.getElementById('result-error').classList.add('hidden');
+}
+
+function showResults(data) {
+    document.getElementById('success-ui').classList.remove('hidden');
+    // Flexible search for the 'Fake' label in the SigLIP2 output array
+    const fakeEntry = data.find(i => i.label.toLowerCase().includes('fake')) || {score: 0};
+    const confidence = (fakeEntry.score * 100).toFixed(1);
+    
+    console.log(`📊 Analysis Results: Fake Prob = ${confidence}%`);
+
+    const status = document.getElementById('result-status');
+    const bar = document.getElementById('result-bar');
+    
+    if (fakeEntry.score > 0.7) {
+        status.innerText = "🚨 Deepfake Detected";
+        status.className = "text-2xl font-black mb-2 text-red-600";
+        bar.className = "h-full bg-red-600 transition-all duration-1000";
+    } else {
+        status.innerText = "✅ Authentic Content";
+        status.className = "text-2xl font-black mb-2 text-green-600";
+        bar.className = "h-full bg-green-600 transition-all duration-1000";
+    }
+    
+    setTimeout(() => {
+        bar.style.width = `${confidence}%`;
+        document.getElementById('confidence-val').innerText = `${confidence}%`;
+    }, 50);
+}
+
+function showResultError() {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('result-error').classList.remove('hidden');
+}
     </script>
 </body>
 </html>
