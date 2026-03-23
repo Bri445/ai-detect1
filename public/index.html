@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Detector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .drop-zone--over { border-color: #6366f1; background-color: #f5f3ff; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-900 flex items-center justify-center min-h-screen p-6">
+
+    <div class="max-w-xl w-full bg-white rounded-2xl shadow-xl p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-indigo-600">AI Image Detector</h1>
+            <p class="text-gray-500 mt-2">Upload a photo to verify its origin.</p>
+        </header>
+
+        <div id="drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center cursor-pointer transition-all hover:border-indigo-400">
+            <input type="file" id="file-input" class="hidden" accept="image/*">
+            <div id="prompt">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <p class="mt-4 text-sm text-gray-600">Drag & drop or <span class="text-indigo-600 font-semibold">click to upload</span></p>
+            </div>
+            <img id="preview" class="hidden mx-auto max-h-64 rounded-lg shadow-sm mt-2">
+        </div>
+
+        <button id="detect-btn" class="w-full mt-6 bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-indigo-700 transition-colors disabled:opacity-50" disabled>
+            Analyze Image
+        </button>
+
+        <div id="result-container" class="hidden mt-8 space-y-4">
+            <div class="h-4 w-full bg-gray-200 rounded-full overflow-hidden">
+                <div id="result-bar" class="h-full bg-indigo-600 transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p id="result-text" class="text-center font-medium text-lg"></p>
+        </div>
+
+        <p id="error-msg" class="hidden mt-4 text-center text-red-500 font-medium">Something went wrong.</p>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const preview = document.getElementById('preview');
+        const prompt = document.getElementById('prompt');
+        const detectBtn = document.getElementById('detect-btn');
+        const resultContainer = document.getElementById('result-container');
+        const resultBar = document.getElementById('result-bar');
+        const resultText = document.getElementById('result-text');
+        const errorMsg = document.getElementById('error-msg');
+
+        let selectedFile = null;
+
+        // Trigger file input on click
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+        // Drag and Drop listeners
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drop-zone--over'); });
+        ['dragleave', 'dragend'].forEach(type => dropZone.addEventListener(type, () => dropZone.classList.remove('drop-zone--over')));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drop-zone--over');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(file) {
+            if (file && file.type.startsWith('image/')) {
+                selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    prompt.classList.add('hidden');
+                    detectBtn.disabled = false;
+                    errorMsg.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        detectBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            // UI State: Loading
+            detectBtn.disabled = true;
+            detectBtn.innerText = "Processing...";
+            resultContainer.classList.add('hidden');
+            errorMsg.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                const response = await fetch('/api/detect', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.error || !response.ok) throw new Error("API Failure");
+
+                // Assuming the API returns a list like: [{label: 'artificial', score: 0.9}, ...]
+                // We find the 'artificial' score
+                const aiScore = data.find(item => item.label === 'artificial' || item.label === 'ai')?.score || 0;
+                const percentage = (aiScore * 100).toFixed(1);
+
+                // Update UI
+                resultContainer.classList.remove('hidden');
+                resultBar.style.width = `${percentage}%`;
+                resultText.innerText = `Likelihood of AI: ${percentage}%`;
+                
+            } catch (err) {
+                // As per your request: hide specific errors and show generic one
+                errorMsg.classList.remove('hidden');
+            } finally {
+                detectBtn.disabled = false;
+                detectBtn.innerText = "Analyze Image";
+            }
+        });
+    </script>
+</body>
+</html>
