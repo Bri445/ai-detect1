@@ -4,8 +4,10 @@ import os
 
 app = FastAPI()
 
+# Configuration
 TOKEN = os.getenv("HF_TOKEN")
-API_URL = "https://router.huggingface.co/hf-inference/models/umm-maybe/AI-image-detector"
+# Specialized 2026 SigLIP2 model for Deepfake detection
+API_URL = "https://router.huggingface.co/hf-inference/models/prithivMLmods/Deepfake-Detect-Siglip2"
 
 @app.post("/api/detect")
 async def detect(file: UploadFile = File(...)):
@@ -16,11 +18,17 @@ async def detect(file: UploadFile = File(...)):
             "Content-Type": "image/jpeg"
         }
         
-        response = requests.post(API_URL, headers=headers, data=contents)
+        # Calling the Hugging Face Router
+        response = requests.post(API_URL, headers=headers, data=contents, timeout=20)
         
         if response.status_code == 200:
-            return response.json()
-        return {"error": "Something went wrong. Please try again later."}
+            results = response.json()
+            # This model returns 'Fake' and 'Real' labels
+            return results
+        
+        print(f"API ERROR: {response.status_code} - {response.text}")
+        return {"error": "Deepfake analysis failed. Please try again."}
     
     except Exception as e:
-        return {"error": "Something went wrong."}
+        print(f"SERVER ERROR: {str(e)}")
+        return {"error": "Internal Server Error."}
